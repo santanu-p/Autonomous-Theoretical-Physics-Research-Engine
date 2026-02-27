@@ -1,5 +1,7 @@
 # Autonomous Theoretical Physics Research Engine
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/santanu-p/Autonomous-Theoretical-Physics-Research-Engine/blob/main/colab_run.ipynb)
+
 This repository provides a runnable baseline implementation of an autonomous
 theoretical physics research engine focused on static, spherically symmetric
 black holes in 4D modified gravity.
