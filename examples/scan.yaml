@@ -1,0 +1,25 @@
+name: baseline_scan
+run_id: scan_demo_001
+theory:
+  name: EinsteinHilbertSeed
+  action: "R - 2*Lambda"
+  fields:
+    - name: g_mu_nu
+      field_type: metric
+  symmetries:
+    - name: static_spherical
+      generators: ["time_translation", "so3"]
+  parameters:
+    mass: 1.0
+    kinetic_coeff: 1.0
+  assumptions:
+    dimension: 4
+    coordinates: ["t", "r", "theta", "phi"]
+    static: true
+    spherical: true
+parameter_grid:
+  alpha: [0.0, 0.02, 0.05]
+  beta: [0.0, 0.02]
+methods: ["shooting", "wkb", "spectral"]
+l_values: [2, 3]
+n_values: [0, 1]

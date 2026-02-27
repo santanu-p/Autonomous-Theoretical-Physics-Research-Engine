@@ -1,0 +1,23 @@
+name: baseline_autonomous_campaign
+run_id: "campaign_demo_001"
+seed_theory:
+  name: EinsteinHilbertSeed
+  action: "R - 2*Lambda"
+  fields:
+    - name: g_mu_nu
+      field_type: metric
+  symmetries:
+    - name: static_spherical
+      generators: ["time_translation", "so3"]
+  parameters:
+    Lambda: 0.0
+    mass: 1.0
+    kinetic_coeff: 1.0
+  assumptions:
+    dimension: 4
+    coordinates: ["t", "r", "theta", "phi"]
+    static: true
+    spherical: true
+proposal_count: 3
+enable_llm: false
+max_retries_per_stage: 2

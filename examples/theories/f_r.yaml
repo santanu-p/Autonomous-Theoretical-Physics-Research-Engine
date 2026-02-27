@@ -1,0 +1,17 @@
+name: fRSeed
+action: "f(R)"
+fields:
+  - name: g_mu_nu
+    field_type: metric
+symmetries:
+  - name: static_spherical
+    generators: ["time_translation", "so3"]
+parameters:
+  alpha: 0.1
+  mass: 1.0
+  kinetic_coeff: 1.0
+assumptions:
+  dimension: 4
+  coordinates: ["t", "r", "theta", "phi"]
+  static: true
+  spherical: true
