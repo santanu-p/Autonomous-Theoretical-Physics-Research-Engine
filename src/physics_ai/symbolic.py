@@ -28,10 +28,14 @@ def _action_locals() -> dict[str, Any]:
 
 def compile_action(theory: TheorySpec) -> SymbolicTheory:
     locals_map = _action_locals()
+    # Force declared parameters to be plain symbols, even when names collide
+    # with SymPy built-ins (e.g. beta).
+    for param_name in theory.parameters:
+        locals_map[param_name] = sp.Symbol(param_name, real=True)
     normalized = theory.action.replace("^", "**")
     expr = sp.sympify(normalized, locals=locals_map)
     family = classify_theory_family(theory)
-    symbols = {name: locals_map.get(name, sp.Symbol(name)) for name in theory.parameters}
+    symbols = {name: locals_map[name] for name in theory.parameters}
     return SymbolicTheory(
         theory_name=theory.name,
         family=family,
