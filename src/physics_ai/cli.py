@@ -197,8 +197,14 @@ def paper_build(
 
 
 @orchestrate_app.command("autonomous")
-def orchestrate_autonomous(campaign: Path) -> None:
-    payload = load_yaml_or_json(campaign)
+def orchestrate_autonomous(
+    campaign: Optional[Path] = typer.Argument(None, help="Path to campaign YAML/JSON."),
+    campaign_path: Optional[Path] = typer.Option(None, "--campaign", help="Path to campaign YAML/JSON."),
+) -> None:
+    selected_campaign = campaign_path or campaign
+    if selected_campaign is None:
+        raise typer.BadParameter("Provide CAMPAIGN positional argument or --campaign <path>.")
+    payload = load_yaml_or_json(selected_campaign)
     campaign_spec = CampaignSpec.model_validate(payload)
     result = run_autonomous_campaign(campaign_spec)
     typer.echo(
