@@ -42,6 +42,12 @@ Run autonomous campaign:
 physai orchestrate autonomous --campaign examples/campaigns/default.yaml
 ```
 
+Run long-horizon autonomous daemon (example: 24h budget):
+
+```bash
+physai orchestrate daemon --campaign examples/campaigns/default.yaml --hours 24 --sleep-seconds 300
+```
+
 ## Layout
 
 - `src/physics_ai/` package code

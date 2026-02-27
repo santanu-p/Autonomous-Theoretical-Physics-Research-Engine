@@ -13,7 +13,7 @@ from physics_ai.distributed import run_scan_distributed
 from physics_ai.explore import run_scan, save_stability_plot, summarize_scan
 from physics_ai.hpc import SlurmJobSpec, write_slurm_script
 from physics_ai.novelty import default_seed_records, score_novelty
-from physics_ai.orchestrate import run_autonomous_campaign
+from physics_ai.orchestrate import run_autonomous_campaign, run_autonomous_daemon
 from physics_ai.paper import build_paper
 from physics_ai.perturbation import derive_master_equation
 from physics_ai.qnm import solve_qnm
@@ -213,6 +213,38 @@ def orchestrate_autonomous(
     )
     for path in result.paper_outputs:
         typer.echo(f"- {path}")
+
+
+@orchestrate_app.command("daemon")
+def orchestrate_daemon(
+    campaign: Optional[Path] = typer.Argument(None, help="Path to campaign YAML/JSON."),
+    campaign_path: Optional[Path] = typer.Option(None, "--campaign", help="Path to campaign YAML/JSON."),
+    hours: float = typer.Option(24.0, help="Total runtime budget in hours."),
+    sleep_seconds: int = typer.Option(120, help="Pause between campaign cycles."),
+    max_cycles: int = typer.Option(0, help="Optional cycle cap; 0 means unlimited."),
+    proposal_count: Optional[int] = typer.Option(None, help="Override proposals per cycle."),
+) -> None:
+    selected_campaign = campaign_path or campaign
+    if selected_campaign is None:
+        raise typer.BadParameter("Provide CAMPAIGN positional argument or --campaign <path>.")
+
+    payload = load_yaml_or_json(selected_campaign)
+    campaign_spec = CampaignSpec.model_validate(payload)
+    cycle_cap = max_cycles if max_cycles > 0 else None
+    result = run_autonomous_daemon(
+        campaign_spec,
+        hours=hours,
+        sleep_seconds=sleep_seconds,
+        max_cycles=cycle_cap,
+        proposal_count=proposal_count,
+    )
+    typer.echo(
+        "Daemon complete "
+        f"cycles={result.cycles_completed} accepted={result.total_accepted} "
+        f"rejected={result.total_rejected} reason={result.stopped_reason}"
+    )
+    for run_id in result.cycle_run_ids:
+        typer.echo(f"- run_id={run_id}")
 
 
 if __name__ == "__main__":

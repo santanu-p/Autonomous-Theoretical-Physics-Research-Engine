@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import time
 from typing import Any
 
 import pandas as pd
@@ -37,6 +38,7 @@ from physics_ai.types import (
     QNMRunConfig,
     TheorySpec,
 )
+from physics_ai.utils import generate_run_id
 
 
 @dataclass(frozen=True)
@@ -46,6 +48,16 @@ class CampaignResult:
     rejected_theories: int
     paper_outputs: list[str]
     summary: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class CampaignDaemonResult:
+    cycles_completed: int
+    total_accepted: int
+    total_rejected: int
+    cycle_run_ids: list[str]
+    paper_outputs: list[str]
+    stopped_reason: str
 
 
 def _log_event(engine, run_id: str, stage: str, status: str, message: str, payload: dict[str, Any] | None = None) -> None:
@@ -248,4 +260,60 @@ def run_autonomous_campaign(campaign: CampaignSpec) -> CampaignResult:
         rejected_theories=rejected,
         paper_outputs=paper_outputs,
         summary=summary,
+    )
+
+
+def run_autonomous_daemon(
+    campaign: CampaignSpec,
+    *,
+    hours: float = 24.0,
+    sleep_seconds: int = 120,
+    max_cycles: int | None = None,
+    proposal_count: int | None = None,
+) -> CampaignDaemonResult:
+    if hours <= 0 and (max_cycles is None or max_cycles <= 0):
+        raise ValueError("Provide a positive hours budget or positive max_cycles.")
+
+    deadline = time.time() + hours * 3600 if hours > 0 else None
+    cycles_completed = 0
+    total_accepted = 0
+    total_rejected = 0
+    all_papers: list[str] = []
+    cycle_run_ids: list[str] = []
+    stopped_reason = "unknown"
+
+    while True:
+        now = time.time()
+        if deadline is not None and now >= deadline:
+            stopped_reason = "time_budget_exhausted"
+            break
+        if max_cycles is not None and cycles_completed >= max_cycles:
+            stopped_reason = "max_cycles_reached"
+            break
+
+        cycle_campaign = campaign.model_copy(deep=True)
+        cycle_campaign.run_id = generate_run_id(campaign.run_id or "campaign")
+        if proposal_count is not None:
+            cycle_campaign.proposal_count = proposal_count
+
+        cycle_result = run_autonomous_campaign(cycle_campaign)
+        cycles_completed += 1
+        cycle_run_ids.append(cycle_result.run_id)
+        total_accepted += cycle_result.accepted_theories
+        total_rejected += cycle_result.rejected_theories
+        all_papers.extend(cycle_result.paper_outputs)
+
+        if sleep_seconds > 0:
+            if deadline is not None and (time.time() + sleep_seconds) >= deadline:
+                stopped_reason = "time_budget_exhausted"
+                break
+            time.sleep(sleep_seconds)
+
+    return CampaignDaemonResult(
+        cycles_completed=cycles_completed,
+        total_accepted=total_accepted,
+        total_rejected=total_rejected,
+        cycle_run_ids=cycle_run_ids,
+        paper_outputs=all_papers,
+        stopped_reason=stopped_reason,
     )
