@@ -16,7 +16,7 @@ from physics_ai.novelty import default_seed_records, score_novelty
 from physics_ai.orchestrate import run_autonomous_campaign
 from physics_ai.paper import build_paper
 from physics_ai.perturbation import derive_master_equation
-from physics_ai.qnm import compare_methods, solve_qnm, spectrum_table
+from physics_ai.qnm import solve_qnm
 from physics_ai.symbolic import derive_field_equations, verify_fr_baseline, verify_gr_baseline
 from physics_ai.theory import load_theory, validate_theory
 from physics_ai.types import CampaignSpec, Method, PaperBuildSpec, QNMRunConfig, ScanJob

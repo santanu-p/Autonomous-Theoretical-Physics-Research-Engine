@@ -38,6 +38,5 @@ def derive_master_equation(
 
 
 def verify_regge_wheeler(perturbation: PerturbationSystem) -> bool:
-    required = ["omega**2", "6.0/r**3", "l"]  # l appears after substitution as number; keep generic check below.
     value = perturbation.effective_potential
     return "omega**2" in perturbation.master_equation and ("6.0/r**3" in value or "6/r**3" in value)
