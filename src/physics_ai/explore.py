@@ -9,7 +9,7 @@ import pandas as pd
 
 from physics_ai.physics_rules import evaluate_constraints
 from physics_ai.qnm import compare_methods, solve_qnm, spectrum_table
-from physics_ai.types import Method, QNMRunConfig, ScanJob
+from physics_ai.types import QNMRunConfig, ScanJob
 
 
 def _iter_parameter_points(grid: dict[str, list[float]]) -> list[dict[str, float]]:
